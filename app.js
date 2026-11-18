@@ -68,11 +68,11 @@ function renderPesan() {
   box.scrollTop = box.scrollHeight;
 }
 function pesanHtml(m) {
-  const img = m.image ? `<img class="lampiran" src="${m.image}" alt="foto terlampir">` : '';
+  const img = m.image ? `<img class="lampiran" src="${m.image}" alt="foto terlampir">${m.imageName ? `<span class="lampiran-nama">${escapeHtml(m.imageName)}</span>` : ''}` : '';
   const teks = escapeHtml(m.content || '');
   const isi = m.role === 'assistant' ? renderIsi(teks) : img + teks;
   const tag = m.role === 'user' ? 'Kamu' : 'Capy';
-  const av = m.role === 'user' ? 'KAMU' : 'CAPY';
+  const av = m.role === 'user' ? 'KAMU' : '<img src="icons/icon-192.png" class="avatar-img" alt="Capy">';
   const avClass = m.role === 'user' ? 'user' : 'ai';
   const errClass = m.role === 'error' ? ' error-bubble' : '';
   return `<div class="msg ${m.role === 'user' ? 'user' : 'ai'}">
@@ -104,27 +104,39 @@ $('#messages').addEventListener('click', (e) => {
   salin(kode, 'Kode tersalin.');
 });
 
-/* ---------- lampiran foto ---------- */
-$('#btn-attach').addEventListener('click', () => $('#file-input').click());
-$('#file-input').addEventListener('change', (e) => {
-  const file = e.target.files && e.target.files[0];
+/* ---------- lampiran foto (galeri & kamera) ---------- */
+function lampirkanFoto(file, dariKamera) {
   if (!file) return;
   if (file.size > 8 * 1024 * 1024) { showToast('Foto terlalu besar (maks 8 MB).'); return; }
   const reader = new FileReader();
   reader.onload = () => {
     state.pendingImage = String(reader.result);
+    state.pendingImageName = file.name || (dariKamera ? 'foto-kamera.jpg' : 'foto.jpg');
     $('#attach-img').src = state.pendingImage;
+    $('#attach-name').textContent = state.pendingImageName;
     $('#attach-strip').classList.remove('hidden');
   };
   reader.readAsDataURL(file);
+}
+$('#btn-attach').addEventListener('click', () => $('#file-input').click());
+$('#file-input').addEventListener('change', (e) => {
+  lampirkanFoto(e.target.files && e.target.files[0], false);
+  e.target.value = '';
+});
+$('#btn-camera').addEventListener('click', () => $('#file-camera').click());
+$('#file-camera').addEventListener('change', (e) => {
+  lampirkanFoto(e.target.files && e.target.files[0], true);
   e.target.value = '';
 });
 $('#btn-remove-attach').addEventListener('click', () => {
   state.pendingImage = null;
+  state.pendingImageName = null;
   $('#attach-strip').classList.add('hidden');
 });
 
 /* ---------- kirim ---------- */
+const APP_URL = 'https://rafieakila-cloud.github.io/capybara-ai/';
+
 async function kirim(teksManual) {
   const input = $('#input-msg');
   const teks = (teksManual ?? input.value).trim();
@@ -132,17 +144,18 @@ async function kirim(teksManual) {
   if (state.sending) return;
 
   const apiKey = getKey();
-  if (!apiKey) { showToast('API key belum diisi. Buka Pengaturan dulu.'); bukaModal(); return; }
+  if (!apiKey) { showToast('API key belum diisi. Buka Pengaturan.'); bukaModal(); return; }
 
   let c = chatAktif();
   if (!c) c = obrolanBaru(teks.slice(0, 48));
 
-  const msgUser = { role: 'user', content: teks || '(foto)', image: state.pendingImage || null };
+  const msgUser = { role: 'user', content: teks || '(foto)', image: state.pendingImage || null, imageName: state.pendingImageName || null };
   c.messages.push(msgUser);
   if (c.title === 'Chat baru' || c.messages.length === 1) c.title = teks.slice(0, 48) || 'Foto';
   c.updated = Date.now(); c.mode = state.mode;
 
   state.pendingImage = null;
+  state.pendingImageName = null;
   $('#attach-strip').classList.add('hidden');
   input.value = ''; input.style.height = 'auto';
 
@@ -151,10 +164,31 @@ async function kirim(teksManual) {
   saveChats(); renderPesan(); renderDaftar();
   tampilkanMengetik(true);
 
+  // pesan asisten placeholder — diisi streaming token per token
+  const pesanAI = { role: 'assistant', content: '' };
+  let renderQueued = false;
+  const dorongKeLayar = () => {
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => {
+      renderQueued = false;
+      c.updated = Date.now();
+      renderPesan();
+    });
+  };
+
   try {
-    const balasan = await tanyaCapy(c);
-    c.messages.push({ role: 'assistant', content: balasan });
+    await tanyaCapy(c, (seluruhTeks) => {
+      if (!pesanAI.content) tampilkanMengetik(false);
+      pesanAI.content = seluruhTeks;
+      if (!c.messages.includes(pesanAI)) c.messages.push(pesanAI);
+      dorongKeLayar();
+    });
+    if (!pesanAI.content) throw new Error('Jawaban kosong dari server.');
+    c.messages = c.messages.filter(m => m !== pesanAI || pesanAI.content);
   } catch (err) {
+    tampilkanMengetik(false);
+    c.messages = c.messages.filter(m => m !== pesanAI);
     c.messages.push({ role: 'error', content: 'Gagal bertanya ke Capy: ' + (err.message || err) });
   }
   c.updated = Date.now();
@@ -171,17 +205,16 @@ function tampilkanMengetik(show) {
       t = document.createElement('div');
       t.id = 'typing-row';
       t.className = 'msg ai';
-      t.innerHTML = '<div class="avatar ai">CAPY</div><div class="bubble"><span class="typing"><i></i><i></i></span></div>';
+      t.innerHTML = '<div class="avatar ai capy-thinking"><img src="icons/icon-192.png" class="typing-capy" alt="Capy sedang berpikir"></div><div class="bubble think-bubble"><span class="typing-label">Capy sedang berpikir</span><span class="typing"><i></i><i></i><i></i></span></div>';
       box.appendChild(t);
     }
     box.scrollTop = box.scrollHeight;
   } else if (t) t.remove();
 }
 
-async function tanyaCapy(chat) {
+async function tanyaCapy(chat, onDelta) {
   const model = getModel();
   const system = MODE_PROMPTS[chat.mode] || MODE_PROMPTS.umum;
-  // ambil riwayat; foto hanya dari 2 pesan terakhir yang punya foto
   const riwayat = [];
   let fotoTerpakai = 0;
   for (let i = chat.messages.length - 1; i >= 0; i--) {
@@ -203,14 +236,38 @@ async function tanyaCapy(chat) {
     headers: {
       'Authorization': 'Bearer ' + getKey(),
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://rafieakila-cloud.github.io/capybara-ai/',
+      'HTTP-Referer': APP_URL,
       'X-Title': 'Capybara AI',
     },
-    body: JSON.stringify({ model, messages }),
+    body: JSON.stringify({ model, messages, stream: true }),
   });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error?.message || ('HTTP ' + res.status + ' dari OpenRouter'));
-  return data?.choices?.[0]?.message?.content?.trim() || '(Capy diam saja)';
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.error?.message || ('HTTP ' + res.status + ' dari OpenRouter'));
+  }
+
+  // streaming SSE: tampilkan token secepat mungkin
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '', penuh = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data:')) continue;
+      const payload = trimmed.slice(5).trim();
+      if (payload === '[DONE]') continue;
+      try {
+        const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content;
+        if (delta) { penuh += delta; onDelta && onDelta(penuh); }
+      } catch { /* baris keep-alive / potongan JSON — abaikan */ }
+    }
+  }
+  return penuh.trim();
 }
 
 /* ---------- salin ---------- */
@@ -269,6 +326,26 @@ $('#btn-test').addEventListener('click', async () => {
   }
 });
 
+/* ---------- share + QR ---------- */
+$('#btn-share').addEventListener('click', () => {
+  $('#modal-share').classList.remove('hidden');
+  if (!$('#share-qr').innerHTML.trim() && window.qrcode) {
+    const qr = qrcode(0, 'M');
+    qr.addData(APP_URL);
+    qr.make();
+    $('#share-qr').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 0 });
+  }
+});
+$('#modal-share').addEventListener('click', (e) => { if (e.target.id === 'modal-share') $('#modal-share').classList.add('hidden'); });
+$('#btn-copy-link').addEventListener('click', () => salin(APP_URL, 'Link tersalin.'));
+$('#btn-native-share').addEventListener('click', async () => {
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Capybara AI', text: 'Coba Capy — asisten AI santai yang ngajarin sampai paham.', url: APP_URL }); } catch { /* dibatalkan */ }
+  } else {
+    salin(APP_URL, 'Link tersalin (share tidak didukung browser ini).');
+  }
+});
+
 /* ---------- event umum ---------- */
 $('#btn-send').addEventListener('click', () => kirim());
 $('#input-msg').addEventListener('keydown', (e) => {
@@ -313,7 +390,13 @@ $('#chat-list').addEventListener('click', (e) => {
   }
 });
 $('#btn-menu').addEventListener('click', () => $('#sidebar').classList.toggle('terbuka'));
-$('.suggestion') && $$('.suggestion').forEach(b => b.addEventListener('click', () => kirim(b.dataset.q)));
+$$('.capy-card').forEach(card => card.addEventListener('click', () => {
+  state.mode = card.dataset.mode;
+  $$('.chip').forEach(c => c.classList.toggle('aktif', c.dataset.mode === state.mode));
+  const c = chatAktif(); if (c) { c.mode = state.mode; saveChats(); }
+  $('#input-msg').focus();
+  showToast('Mode ' + card.querySelector('.capy-card-title').textContent.trim() + ' aktif.');
+}));
 
 /* ---------- toast ---------- */
 function showToast(msg) {

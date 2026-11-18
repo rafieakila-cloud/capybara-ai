@@ -40,6 +40,9 @@
       <div class="topbar-logo" id="topbar-orb"></div>
       <div class="topbar-name">Capybara <span>AI</span></div>
       <div class="topbar-spacer"></div>
+      <button class="icon-btn" id="btn-share" title="Bagikan Capy AI ke teman">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="6" r="2.6"/><circle cx="18" cy="18" r="2.6"/><path d="M8.3 10.8l7.4-3.6M8.3 13.2l7.4 3.6"/></svg>
+      </button>
       <button class="icon-btn" id="btn-settings-2" title="Pengaturan API">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3.2M12 18.8V22M4.9 4.9L7.2 7.2M16.8 16.8l2.3 2.3M2 12h3.2M18.8 12H22M4.9 19.1l2.3-2.3M16.8 7.2l2.3-2.3"/></svg>
       </button>
@@ -50,11 +53,27 @@
       <div class="welcome-orb" id="welcome-orb"></div>
       <h1 class="welcome-title">Capybara <span>AI</span></h1>
       <p class="welcome-sub">Tulis cerita &amp; blog. Tulis kode. Tanya soal AI.<br>Ngajarin sampai paham — santai dan sabar.</p>
-      <div class="suggestions">
-        <button class="suggestion" data-q="Tulis cerita pendek tentang kapibara yang menjadi penjaga perpustakaan ajaib.">Cerita kapibara penjaga pustaka</button>
-        <button class="suggestion" data-q="Tulis blog 500 kata tentang mengapa belajar AI itu penting untuk pelajar Indonesia.">Blog: kenapa AI penting</button>
-        <button class="suggestion" data-q="Buatkan fungsi Python untuk mengecek bilangan prima, lalu jelaskan sampai aku paham.">Kode primality + penjelasan</button>
-        <button class="suggestion" data-q="Jelaskan apa itu RAG (Retrieval Augmented Generation) dari nol sampai paham, pakai analogi.">Jelaskan RAG sampai paham</button>
+      <div class="capy-cards">
+        <button class="capy-card" data-mode="cerita">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1.1-4.2L15.4 5.5a2.12 2.12 0 0 1 3 3L8.2 18.9 4 20z"/><path d="M13.5 7.5l3 3"/></svg>
+          <span class="capy-card-title">Cerita &amp; Blog</span>
+          <span class="capy-card-sub">Cerpen, naskah, artikel — hidup dan tajam</span>
+        </button>
+        <button class="capy-card" data-mode="koding">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 8l-5 4 5 4M15.5 8l5 4-5 4M13 5.5l-2 13"/></svg>
+          <span class="capy-card-title">Koding</span>
+          <span class="capy-card-sub">Kode yang jalan + dijelaskan sampai paham</span>
+        </button>
+        <button class="capy-card" data-mode="ahliai">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="10" y="10" width="4" height="4"/><path d="M9 2v2.5M15 2v2.5M9 19.5V22M15 19.5V22M2 9h2.5M2 15h2.5M19.5 9H22M19.5 15H22"/></svg>
+          <span class="capy-card-title">Ahli AI</span>
+          <span class="capy-card-sub">LLM, RAG, fine-tuning — dibedah tuntas</span>
+        </button>
+        <button class="capy-card" data-mode="belajar">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg>
+          <span class="capy-card-title">Belajar</span>
+          <span class="capy-card-sub">Analogi dulu, teknis kemudian. Inti di akhir</span>
+        </button>
       </div>
       <div class="welcome-note" id="welcome-note"></div>
     </div>
@@ -74,16 +93,23 @@
 
       <div class="attach-strip hidden" id="attach-strip">
         <div class="attach-thumb"><img id="attach-img" alt="foto terlampir"><button class="attach-remove" id="btn-remove-attach" title="Hapus lampiran">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button></div>
-        <div class="attach-label">Foto terlampir — Capy akan membacanya</div>
+        <div class="attach-meta">
+          <span class="attach-name" id="attach-name">foto.jpg</span>
+          <span class="attach-label">terlampir — Capy akan membacanya</span>
+        </div>
       </div>
 
       <div class="input-row">
-        <button class="attach-btn" id="btn-attach" title="Lampirkan foto dari galeri">
+        <button class="attach-btn" id="btn-attach" title="Foto dari galeri">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5L8 19"/></svg>
         </button>
+        <button class="attach-btn" id="btn-camera" title="Jepret foto dari kamera">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h2.5l2-2.5h7L17.5 8H20a1.5 1.5 0 0 1 1.5 1.5V18a2 2 0 0 1-2 2H4.5a2 2 0 0 1-2-2V9.5A1.5 1.5 0 0 1 4 8z"/><circle cx="12" cy="13.5" r="3.6"/></svg>
+        </button>
         <input type="file" id="file-input" accept="image/*" hidden>
+        <input type="file" id="file-camera" accept="image/*" capture="environment" hidden>
         <textarea id="input-msg" rows="1" placeholder="Tanya apa pun ke Capy..." autocomplete="off"></textarea>
         <button class="send-btn" id="btn-send" title="Kirim">
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10.5 13.5"/><path d="M21 3l-7 18-3.5-7.5L3 10 21 3z"/></svg>
@@ -92,6 +118,20 @@
       <div class="composer-foot"><span id="model-label">openrouter/auto</span><span>Capybara AI bisa salah — cek jawaban penting.</span></div>
     </div>
   </main>
+</div>
+
+<!-- ===== SHARE MODAL (QR) ===== -->
+<div class="modal-backdrop hidden" id="modal-share">
+  <div class="modal share-modal">
+    <div class="modal-title">Bagikan Capy AI</div>
+    <div class="modal-sub">Temanmu tinggal scan — langsung bisa pakai, gratis.</div>
+    <div class="share-qr" id="share-qr"></div>
+    <div class="share-url" id="share-url">https://rafieakila-cloud.github.io/capybara-ai/</div>
+    <div class="modal-actions">
+      <button class="mbtn" id="btn-copy-link">Salin Link</button>
+      <button class="mbtn utama" id="btn-native-share">Bagikan...</button>
+    </div>
+  </div>
 </div>
 
 <!-- ===== SETTINGS MODAL ===== -->
@@ -117,6 +157,7 @@
 
 <div class="toast hidden" id="toast"></div>
 
+<script src="vendor-qrcode.js"></script>
 <script src="app.js"></script>
 <script>
   if ('serviceWorker' in navigator) {

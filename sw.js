@@ -1,9 +1,10 @@
-const CACHE = 'capybara-ai-v1.0.0';
+const CACHE = 'capybara-ai-v1.1.0';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './vendor-qrcode.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
