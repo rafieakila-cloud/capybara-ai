@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e1e">
+<meta name="description" content="Capy AI — asisten AI: tulis cerita dan blog, tulis kode, tanya soal AI, dan belajar sampai paham. Santai, sabar, tanpa basa-basi.">
+<title>Capybara AI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== SIDEBAR RIWAYAT ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <span class="sidebar-title">RIWAYAT</span>
+      <button class="icon-btn" id="btn-new-chat" title="Chat baru">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="chat-list" id="chat-list"></div>
+    <div class="sidebar-foot">
+      <button class="settings-btn" id="btn-settings">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3.2M12 18.8V22M4.9 4.9L7.2 7.2M16.8 16.8l2.3 2.3M2 12h3.2M18.8 12H22M4.9 19.1l2.3-2.3M16.8 7.2l2.3-2.3"/></svg>
+        API &amp; Model
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn hamburger" id="btn-menu" title="Menu">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="topbar-logo" id="topbar-orb"></div>
+      <div class="topbar-name">Capybara <span>AI</span></div>
+      <div class="topbar-spacer"></div>
+      <button class="icon-btn" id="btn-settings-2" title="Pengaturan API">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3.2M12 18.8V22M4.9 4.9L7.2 7.2M16.8 16.8l2.3 2.3M2 12h3.2M18.8 12H22M4.9 19.1l2.3-2.3M16.8 7.2l2.3-2.3"/></svg>
+      </button>
+    </header>
+
+    <!-- WELCOME -->
+    <div class="welcome" id="welcome">
+      <div class="welcome-orb" id="welcome-orb"></div>
+      <h1 class="welcome-title">Capybara <span>AI</span></h1>
+      <p class="welcome-sub">Tulis cerita &amp; blog. Tulis kode. Tanya soal AI.<br>Ngajarin sampai paham — santai dan sabar.</p>
+      <div class="suggestions">
+        <button class="suggestion" data-q="Tulis cerita pendek tentang kapibara yang menjadi penjaga perpustakaan ajaib.">Cerita kapibara penjaga pustaka</button>
+        <button class="suggestion" data-q="Tulis blog 500 kata tentang mengapa belajar AI itu penting untuk pelajar Indonesia.">Blog: kenapa AI penting</button>
+        <button class="suggestion" data-q="Buatkan fungsi Python untuk mengecek bilangan prima, lalu jelaskan sampai aku paham.">Kode primality + penjelasan</button>
+        <button class="suggestion" data-q="Jelaskan apa itu RAG (Retrieval Augmented Generation) dari nol sampai paham, pakai analogi.">Jelaskan RAG sampai paham</button>
+      </div>
+      <div class="welcome-note" id="welcome-note"></div>
+    </div>
+
+    <!-- PESAN -->
+    <div class="messages hidden" id="messages"></div>
+
+    <!-- INPUT -->
+    <div class="composer">
+      <div class="mode-chips" id="mode-chips">
+        <button class="chip aktif" data-mode="umum">Umum</button>
+        <button class="chip" data-mode="cerita">Cerita &amp; Blog</button>
+        <button class="chip" data-mode="koding">Koding</button>
+        <button class="chip" data-mode="ahliai">Ahli AI</button>
+        <button class="chip" data-mode="belajar">Belajar</button>
+      </div>
+
+      <div class="attach-strip hidden" id="attach-strip">
+        <div class="attach-thumb"><img id="attach-img" alt="foto terlampir"><button class="attach-remove" id="btn-remove-attach" title="Hapus lampiran">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button></div>
+        <div class="attach-label">Foto terlampir — Capy akan membacanya</div>
+      </div>
+
+      <div class="input-row">
+        <button class="attach-btn" id="btn-attach" title="Lampirkan foto dari galeri">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5L8 19"/></svg>
+        </button>
+        <input type="file" id="file-input" accept="image/*" hidden>
+        <textarea id="input-msg" rows="1" placeholder="Tanya apa pun ke Capy..." autocomplete="off"></textarea>
+        <button class="send-btn" id="btn-send" title="Kirim">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L10.5 13.5"/><path d="M21 3l-7 18-3.5-7.5L3 10 21 3z"/></svg>
+        </button>
+      </div>
+      <div class="composer-foot"><span id="model-label">openrouter/auto</span><span>Capybara AI bisa salah — cek jawaban penting.</span></div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="modal-backdrop hidden" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-title">API &amp; Model</div>
+    <div class="modal-sub">Set sekali — tersimpan hanya di perangkat ini.</div>
+    <label class="field-label">OpenRouter API Key
+      <input type="password" id="s-apikey" placeholder="sk-or-v1-..." autocomplete="off">
+    </label>
+    <label class="field-label">Model
+      <input type="text" id="s-model" placeholder="openrouter/auto" autocomplete="off">
+    </label>
+    <div class="modal-note">Default <code>openrouter/auto</code> — OpenRouter memilih model terbaik otomatis. Contoh lain: <code>openai/gpt-4o-mini</code>, <code>google/gemini-2.0-flash</code>. Untuk membaca foto, gunakan model dengan kemampuan visi.</div>
+    <div class="test-result hidden" id="test-result"></div>
+    <div class="modal-actions">
+      <button class="mbtn" id="btn-test">Tes Koneksi</button>
+      <button class="mbtn" id="btn-clear-key">Hapus Key</button>
+      <button class="mbtn utama" id="btn-save-settings">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+</script>
+</body>
+</html>
